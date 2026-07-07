@@ -15,18 +15,18 @@ export function Header({ title, description }: HeaderProps) {
   const activeAlerts = alerts.filter((a) => !a.acknowledged).length;
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-800 bg-slate-950/60 px-8 backdrop-blur-xl">
-      <div>
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
-        {description && <p className="text-xs text-slate-500">{description}</p>}
+    <header className="sticky top-0 z-30 flex flex-col gap-3 border-b border-slate-800 bg-slate-950/60 px-4 py-3 backdrop-blur-xl md:h-16 md:flex-row md:items-center md:justify-between md:gap-4 md:px-8 md:py-0">
+      <div className="min-w-0 flex-1">
+        <h2 className="text-base sm:text-lg font-semibold text-white truncate">{title}</h2>
+        {description && <p className="text-xs text-slate-500 truncate">{description}</p>}
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative hidden md:block">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="relative hidden sm:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           <Input
-            placeholder="Search inventory..."
-            className="w-64 pl-9"
+            placeholder="Search..."
+            className="w-40 sm:w-56 lg:w-64 pl-9 text-sm"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 const q = (e.target as HTMLInputElement).value;
@@ -37,15 +37,15 @@ export function Header({ title, description }: HeaderProps) {
         </div>
 
         <button className="relative rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200">
-          <Bell className="h-5 w-5" />
+          <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
           {activeAlerts > 0 && (
             <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-              {activeAlerts}
+              {activeAlerts > 9 ? "9+" : activeAlerts}
             </span>
           )}
         </button>
 
-        <Badge variant={connected ? "success" : "danger"} className="hidden sm:flex">
+        <Badge variant={connected ? "success" : "danger"} className="hidden sm:flex text-xs">
           {connected ? "Real-time" : "Offline"}
         </Badge>
       </div>

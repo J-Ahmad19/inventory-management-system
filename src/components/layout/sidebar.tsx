@@ -24,12 +24,22 @@ const navItems = [
   { href: "/alerts", label: "Alerts", icon: AlertTriangle },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isMobile?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isMobile = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { metrics, alerts } = useRealtime();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-950/80 backdrop-blur-xl">
+    <aside
+      className={cn(
+        "flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-950/80 backdrop-blur-xl",
+        isMobile ? "fixed left-0 top-0 z-40" : "fixed left-0 top-0 z-40"
+      )}
+    >
       <div className="flex h-16 items-center gap-3 border-b border-slate-800 px-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 shadow-lg shadow-emerald-600/30">
           <Boxes className="h-5 w-5 text-white" />
@@ -51,6 +61,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => isMobile && onClose?.()}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                 isActive

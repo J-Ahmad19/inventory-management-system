@@ -89,7 +89,7 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {adjustingInventory && (
         <StockAdjustmentModal
           inventory={adjustingInventory}
@@ -102,18 +102,18 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
       )}
 
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-3">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Input
               placeholder="Search by name or SKU..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="max-w-xs"
+              className="w-full sm:max-w-xs"
             />
             <select
               value={locationId}
               onChange={(e) => setLocationId(e.target.value)}
-              className="h-10 rounded-lg border border-slate-700 bg-slate-900/80 px-3 text-sm text-slate-200"
+              className="h-10 w-full rounded-lg border border-slate-700 bg-slate-900/80 px-3 text-sm text-slate-200 sm:w-auto"
             >
               <option value="">All Locations</option>
               {allLocations.map((l) => (
@@ -122,11 +122,17 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
                 </option>
               ))}
             </select>
-            <Button variant="outline" size="sm" onClick={fetchInventory} disabled={loading}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchInventory}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
               <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-              Refresh
+              <span className="ml-2 hidden sm:inline">Refresh</span>
             </Button>
-            <div className="ml-auto flex items-center gap-1 text-xs text-slate-500">
+            <div className="flex items-center gap-1 text-xs text-slate-500 sm:ml-auto">
               <Filter className="h-3.5 w-3.5" />
               {filteredInventory.length} items
             </div>
@@ -136,21 +142,21 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Inventory Items</CardTitle>
+          <CardTitle className="text-sm sm:text-base">Inventory Items</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+        <CardContent className="p-3 sm:p-6">
+          <div className="overflow-x-auto -mx-3 sm:mx-0">
+            <table className="w-full min-w-max text-sm">
               <thead>
-                <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
-                  <th className="pb-3 pr-4 font-medium">Product</th>
-                  <th className="pb-3 pr-4 font-medium">SKU</th>
-                  <th className="pb-3 pr-4 font-medium">Category</th>
-                  <th className="pb-3 pr-4 font-medium">On Hand</th>
-                  <th className="pb-3 pr-4 font-medium">Allocated</th>
-                  <th className="pb-3 pr-4 font-medium">Reorder Point</th>
-                  <th className="pb-3 pr-4 font-medium">Value</th>
-                  <th className="pb-3 font-medium">Status</th>
+                <tr className="border-b border-slate-800 text-left text-xs text-slate-500 sticky top-0 bg-slate-900/50">
+                  <th className="pb-3 pr-2 sm:pr-4 font-medium">Product</th>
+                  <th className="pb-3 pr-2 sm:pr-4 font-medium hidden sm:table-cell">SKU</th>
+                  <th className="pb-3 pr-2 sm:pr-4 font-medium hidden md:table-cell">Category</th>
+                  <th className="pb-3 pr-2 sm:pr-4 font-medium">On Hand</th>
+                  <th className="pb-3 pr-2 sm:pr-4 font-medium hidden md:table-cell">Allocated</th>
+                  <th className="pb-3 pr-2 sm:pr-4 font-medium hidden lg:table-cell">Reorder</th>
+                  <th className="pb-3 pr-2 sm:pr-4 font-medium hidden xl:table-cell">Value</th>
+                  <th className="pb-3 pr-2 sm:pr-4 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -170,26 +176,28 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
                           setExpandedId(expandedId === productId ? null : productId)
                         }
                       >
-                        <td className="py-3 pr-4 font-medium text-slate-200">
+                        <td className="py-2 sm:py-3 pr-2 sm:pr-4 font-medium text-slate-200 text-xs sm:text-sm">
                           {product.name}
                         </td>
-                        <td className="py-3 pr-4 font-mono text-xs text-slate-400">
+                        <td className="py-2 sm:py-3 pr-2 sm:pr-4 font-mono text-xs text-slate-400 hidden sm:table-cell">
                           {product.sku}
                         </td>
-                        <td className="py-3 pr-4 text-slate-400">{product.category}</td>
-                        <td className="py-3 pr-4 text-slate-300">
+                        <td className="py-2 sm:py-3 pr-2 sm:pr-4 text-slate-400 hidden md:table-cell text-xs">
+                          {product.category}
+                        </td>
+                        <td className="py-2 sm:py-3 pr-2 sm:pr-4 text-slate-300 font-semibold">
                           {formatNumber(totalOnHand)}
                         </td>
-                        <td className="py-3 pr-4 text-slate-300">
+                        <td className="py-2 sm:py-3 pr-2 sm:pr-4 text-slate-300 hidden md:table-cell text-xs">
                           {formatNumber(totalAllocated)}
                         </td>
-                        <td className="py-3 pr-4 text-slate-300">
+                        <td className="py-2 sm:py-3 pr-2 sm:pr-4 text-slate-300 hidden lg:table-cell text-xs">
                           {formatNumber(invList[0]?.reorder_point || 0)}
                         </td>
-                        <td className="py-3 pr-4 text-slate-400">
+                        <td className="py-2 sm:py-3 pr-2 sm:pr-4 text-slate-400 hidden xl:table-cell text-xs">
                           {formatCurrency(totalValue / 100)}
                         </td>
-                        <td className="py-3 pr-4">
+                        <td className="py-2 sm:py-3 pr-2 sm:pr-4">
                           <span
                             className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${getStatusColor(totalOnHand, invList[0]?.reorder_point || 0)}`}
                           >
@@ -199,8 +207,8 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
                       </tr>
                       {expandedId === productId && (
                         <tr className="bg-slate-900/50">
-                          <td colSpan={8} className="px-4 py-3">
-                            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                          <td colSpan={8} className="px-3 sm:px-4 py-3">
+                            <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                               {invList.map((inv) => {
                                 const loc = locations.get(inv.location_id);
                                 return (

@@ -48,13 +48,13 @@ export default function AlertsPage() {
         title="Alerts"
         description="Real-time notifications for stock, shrinkage, and replenishment"
       />
-      <div className="p-8">
-        <div className="mb-4 flex gap-2">
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6 md:p-8">
+        <div className="mb-4 flex flex-wrap gap-2">
           {(["active", "all", "acknowledged"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors ${
                 filter === f
                   ? "bg-emerald-600/10 text-emerald-400"
                   : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"

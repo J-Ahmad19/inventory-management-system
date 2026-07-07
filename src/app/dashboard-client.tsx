@@ -68,19 +68,19 @@ export default function DashboardPage() {
         title="Dashboard"
         description="Real-time inventory overview across all locations"
       />
-      <div className="space-y-6 p-8">
+      <div className="space-y-4 p-4 sm:space-y-6 sm:p-6 md:p-8">
         {metrics && <KpiCards metrics={metrics} />}
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             {data && <StockTrendChart data={data.trends} />}
           </div>
-          <div>
+          <div className="h-full">
             <AlertsFeed alerts={displayAlerts} compact />
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
           {data && <CategoryChart data={data.categories} />}
           {data && <LocationUtilizationChart data={data.locations} />}
         </div>
@@ -89,7 +89,7 @@ export default function DashboardPage() {
           <PredictionsTable predictions={data.predictions} />
         )}
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
           {data && (
             <Card>
               <CardHeader>

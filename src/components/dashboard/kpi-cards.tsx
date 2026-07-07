@@ -69,20 +69,20 @@ const kpiConfig = [
 
 export function KpiCards({ metrics }: KpiCardsProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
       {kpiConfig.map((kpi) => {
         const Icon = kpi.icon;
         const value = metrics[kpi.key];
         return (
           <Card key={kpi.key} className="glow-emerald transition-transform hover:scale-[1.02]">
-            <CardContent className="p-4">
+            <CardContent className="p-2 sm:p-4">
               <div className="flex items-center justify-between">
-                <div className={`rounded-lg p-2 ${kpi.bg}`}>
-                  <Icon className={`h-4 w-4 ${kpi.color}`} />
+                <div className={`rounded-lg p-1.5 sm:p-2 ${kpi.bg}`}>
+                  <Icon className={`h-3 w-3 sm:h-4 sm:w-4 ${kpi.color}`} />
                 </div>
               </div>
-              <p className="mt-3 text-2xl font-bold text-white">{kpi.format(value)}</p>
-              <p className="text-xs text-slate-500">{kpi.label}</p>
+              <p className="mt-2 sm:mt-3 text-lg sm:text-2xl font-bold text-white">{kpi.format(value)}</p>
+              <p className="text-[10px] sm:text-xs text-slate-500">{kpi.label}</p>
             </CardContent>
           </Card>
         );
