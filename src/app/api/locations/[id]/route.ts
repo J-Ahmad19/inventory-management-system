@@ -27,54 +27,55 @@ async function createClient() {
   );
 }
 
-// GET all locations
-export async function GET(request: NextRequest) {
+// PATCH - update location
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const supabase = await createClient();
 
   try {
-    const { data, error } = await supabase
-      .from("location")
-      .select("*")
-      .order("name");
-
-    if (error) throw error;
-
-    return NextResponse.json({ data });
-  } catch (error) {
-    console.error("Error fetching locations:", error);
-    return NextResponse.json({ error: "Failed to fetch locations" }, { status: 500 });
-  }
-}
-
-// POST - create location
-export async function POST(request: NextRequest) {
-  const supabase = await createClient();
-
-  try {
+    const { id } = await params;
     const body = await request.json();
-    const { name, type, capacity } = body;
-
-    if (!name || !type) {
-      return NextResponse.json({ error: "Name and type are required" }, { status: 400 });
-    }
 
     const { data, error } = await supabase
       .from("location")
-      .insert([
-        {
-          name,
-          type,
-          capacity: capacity || 0,
-        },
-      ])
+      .update({
+        name: body.name,
+        type: body.type,
+        capacity: body.capacity,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
       .select()
       .single();
 
     if (error) throw error;
 
-    return NextResponse.json({ data }, { status: 201 });
+    return NextResponse.json({ data });
   } catch (error) {
-    console.error("Error creating location:", error);
-    return NextResponse.json({ error: "Failed to create location" }, { status: 500 });
+    console.error("Error updating location:", error);
+    return NextResponse.json({ error: "Failed to update location" }, { status: 500 });
+  }
+}
+
+// DELETE - delete location
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createClient();
+
+  try {
+    const { id } = await params;
+
+    const { error } = await supabase.from("location").delete().eq("id", id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting location:", error);
+    return NextResponse.json({ error: "Failed to delete location" }, { status: 500 });
   }
 }

@@ -1,54 +1,42 @@
-import { NextResponse } from "next/server";
-import { getStore } from "@/lib/store/inventory-store";
+import { createClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const store = getStore();
+export async function GET(request: NextRequest) {
+  const supabase = await createClient();
 
-  const items = store.getInventoryItems({
-    search: searchParams.get("search") ?? undefined,
-    categoryId: searchParams.get("categoryId") ?? undefined,
-    locationId: searchParams.get("locationId") ?? undefined,
-    status: searchParams.get("status") ?? undefined,
-  });
-
-  return NextResponse.json({
-    items,
-    categories: store.getCategories(),
-    locations: store.getLocations(),
-  });
-}
-
-export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const store = getStore();
+    const { searchParams } = new URL(request.url);
+    const productId = searchParams.get("productId");
+    const locationId = searchParams.get("locationId");
 
-    if (body.action === "transfer") {
-      const result = store.transferStock(
-        body.productId,
-        body.fromLocationId,
-        body.toLocationId,
-        body.quantity
+    let query = supabase
+      .from("inventory")
+      .select(
+        `
+        *,
+        product:product_id(*),
+        location:location_id(*)
+      `
       );
-      return NextResponse.json({ success: true, data: result });
+
+    if (productId) {
+      query = query.eq("product_id", productId);
     }
 
-    if (body.action === "adjust") {
-      const result = store.adjustStock(
-        body.productId,
-        body.locationId,
-        body.quantity,
-        body.reason
-      );
-      return NextResponse.json({ success: true, data: result });
+    if (locationId) {
+      query = query.eq("location_id", locationId);
     }
 
-    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return NextResponse.json({ data });
   } catch (error) {
+    console.error("Error fetching inventory:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Operation failed" },
-      { status: 400 }
+      { error: "Failed to fetch inventory" },
+      { status: 500 }
     );
   }
 }

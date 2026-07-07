@@ -27,44 +27,43 @@ async function createClient() {
   );
 }
 
-// GET all locations
+// GET all products
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
 
   try {
-    const { data, error } = await supabase
-      .from("location")
-      .select("*")
-      .order("name");
+    const { data, error } = await supabase.from("product").select("*").order("name");
 
     if (error) throw error;
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error("Error fetching locations:", error);
-    return NextResponse.json({ error: "Failed to fetch locations" }, { status: 500 });
+    console.error("Error fetching products:", error);
+    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
   }
 }
 
-// POST - create location
+// POST - create product
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
 
   try {
     const body = await request.json();
-    const { name, type, capacity } = body;
+    const { sku, name, category, lead_time_days, base_price } = body;
 
-    if (!name || !type) {
-      return NextResponse.json({ error: "Name and type are required" }, { status: 400 });
+    if (!sku || !name) {
+      return NextResponse.json({ error: "SKU and name are required" }, { status: 400 });
     }
 
     const { data, error } = await supabase
-      .from("location")
+      .from("product")
       .insert([
         {
+          sku,
           name,
-          type,
-          capacity: capacity || 0,
+          category,
+          lead_time_days: lead_time_days || 7,
+          base_price: base_price || 0,
         },
       ])
       .select()
@@ -74,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
-    console.error("Error creating location:", error);
-    return NextResponse.json({ error: "Failed to create location" }, { status: 500 });
+    console.error("Error creating product:", error);
+    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
   }
 }

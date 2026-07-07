@@ -1,76 +1,98 @@
-export type StockStatus = "in_stock" | "low_stock" | "critical" | "out_of_stock" | "overstock";
-
-export type AlertSeverity = "info" | "warning" | "critical";
-
+export type LocationType = "WAREHOUSE" | "RETAIL" | "DARK_STORE";
+export type TransactionType = "INBOUND" | "OUTBOUND" | "TRANSFER" | "ADJUST";
 export type AlertType =
-  | "low_stock"
-  | "shrinkage"
-  | "replenishment"
-  | "overstock"
-  | "transfer"
-  | "anomaly";
-
-export type MovementType = "inbound" | "outbound" | "transfer" | "adjustment" | "shrinkage";
-
-export interface Location {
-  id: string;
-  name: string;
-  code: string;
-  type: "warehouse" | "store" | "distribution";
-  address: string;
-  capacity: number;
-  manager: string;
-}
-
-export interface Category {
-  id: string;
-  name: string;
-}
+  | "LOW_STOCK"
+  | "LOW_STOCK_PREDICTION"
+  | "OVERSTOCK"
+  | "SHRINKAGE";
 
 export interface Product {
   id: string;
   sku: string;
   name: string;
-  categoryId: string;
-  unitCost: number;
-  unitPrice: number;
-  reorderPoint: number;
-  reorderQuantity: number;
-  leadTimeDays: number;
-  supplier: string;
+  category: string;
+  lead_time_days: number;
+  base_price: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface StockLevel {
+export interface Location {
   id: string;
-  productId: string;
-  locationId: string;
-  quantity: number;
-  reserved: number;
-  lastCounted: string;
-  expectedQuantity?: number;
+  name: string;
+  type: LocationType;
+  capacity: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface StockMovement {
+export interface Inventory {
   id: string;
-  productId: string;
-  locationId: string;
-  type: MovementType;
+  product_id: string;
+  location_id: string;
+  qty_on_hand: number;
+  qty_allocated: number;
+  reorder_point: number;
+  created_at: string;
+  updated_at: string;
+  product?: Product;
+  location?: Location;
+}
+
+export interface TransactionLedger {
+  id: string;
+  type: TransactionType;
+  product_id: string;
+  from_location: string | null;
+  to_location: string | null;
   quantity: number;
+  reason: string | null;
+  initiated_by: string | null;
   timestamp: string;
-  reference?: string;
-  notes?: string;
+  product?: Product;
+  fromLocation?: Location;
+  toLocation?: Location;
 }
 
 export interface Alert {
   id: string;
   type: AlertType;
-  severity: AlertSeverity;
-  title: string;
+  product_id: string;
+  location_id: string | null;
   message: string;
-  productId?: string;
-  locationId?: string;
-  timestamp: string;
+  days_until_stockout: number | null;
+  recommended_order_qty: number | null;
+  confidence_score: number | null;
   acknowledged: boolean;
+  created_at: string;
+  updated_at: string;
+  product?: Product;
+  location?: Location;
+}
+
+export interface DashboardMetrics {
+  totalProducts: number;
+  totalLocations: number;
+  lowStockItems: number;
+  pendingAlerts: number;
+  totalInventoryValue: number;
+  stockoutRiskItems: number;
+}
+
+export interface InventoryTransfer {
+  product_id: string;
+  from_location: string;
+  to_location: string;
+  quantity: number;
+  reason?: string;
+}
+
+export interface StockAdjustment {
+  product_id: string;
+  location_id: string;
+  quantity_change: number;
+  reason: string;
+  initiated_by: string;
 }
 
 export interface ReplenishmentPrediction {
@@ -98,36 +120,3 @@ export interface ShrinkageReport {
   variancePercent: number;
   estimatedLoss: number;
 }
-
-export interface DashboardMetrics {
-  totalSKUs: number;
-  totalUnits: number;
-  totalValue: number;
-  lowStockCount: number;
-  criticalStockCount: number;
-  activeAlerts: number;
-  shrinkageLoss: number;
-  fillRate: number;
-  turnoverRate: number;
-}
-
-export interface InventoryItem extends Product {
-  categoryName: string;
-  locations: Array<{
-    locationId: string;
-    locationName: string;
-    quantity: number;
-    reserved: number;
-    available: number;
-    status: StockStatus;
-  }>;
-  totalQuantity: number;
-  totalAvailable: number;
-  status: StockStatus;
-}
-
-export type RealtimeEvent = {
-  type: "init" | "stock_update" | "alert" | "movement" | "metrics";
-  payload: unknown;
-  timestamp: string;
-};

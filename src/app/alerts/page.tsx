@@ -15,13 +15,13 @@ export default function AlertsPage() {
   const fetchAlerts = useCallback(async () => {
     const params =
       filter === "active"
-        ? "?acknowledged=false"
+        ? "?unacknowledged=true"
         : filter === "acknowledged"
-          ? "?acknowledged=true"
+          ? ""
           : "";
     const res = await fetch(`/api/alerts${params}`);
     const data = await res.json();
-    setAlerts(data.alerts);
+    setAlerts(data.data || []);
   }, [filter]);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function AlertsPage() {
     await fetch("/api/alerts", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ alert_id: id, acknowledged: true }),
     });
     fetchAlerts();
   };

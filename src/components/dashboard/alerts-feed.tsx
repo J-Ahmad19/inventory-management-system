@@ -1,14 +1,29 @@
 "use client";
 
-import { AlertTriangle, CheckCircle, Info, XCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  TrendingDown,
+  XCircle,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Alert } from "@/lib/types";
 
-const severityConfig = {
-  info: { icon: Info, variant: "info" as const, color: "text-blue-400" },
-  warning: { icon: AlertTriangle, variant: "warning" as const, color: "text-amber-400" },
-  critical: { icon: XCircle, variant: "danger" as const, color: "text-red-400" },
+const typeConfig: Record<string, { icon: any; variant: any; color: string }> = {
+  LOW_STOCK: {
+    icon: AlertTriangle,
+    variant: "warning" as const,
+    color: "text-amber-400",
+  },
+  LOW_STOCK_PREDICTION: {
+    icon: TrendingDown,
+    variant: "warning" as const,
+    color: "text-orange-400",
+  },
+  OVERSTOCK: { icon: AlertTriangle, variant: "info" as const, color: "text-blue-400" },
+  SHRINKAGE: { icon: XCircle, variant: "danger" as const, color: "text-red-400" },
 };
 
 interface AlertsFeedProps {
@@ -40,7 +55,7 @@ export function AlertsFeed({ alerts, onAcknowledge, compact = false }: AlertsFee
           </div>
         ) : (
           displayAlerts.map((alert) => {
-            const config = severityConfig[alert.severity];
+            const config = typeConfig[alert.type] || typeConfig.LOW_STOCK;
             const Icon = config.icon;
             return (
               <div
@@ -55,15 +70,18 @@ export function AlertsFeed({ alerts, onAcknowledge, compact = false }: AlertsFee
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="truncate text-sm font-medium text-slate-200">
-                      {alert.title}
+                      {alert.message}
                     </p>
                     <Badge variant={config.variant} className="shrink-0 text-[10px]">
                       {alert.type.replace("_", " ")}
                     </Badge>
                   </div>
-                  <p className="mt-0.5 text-xs text-slate-500">{alert.message}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    {alert.product?.name || "Product"}
+                    {alert.location && ` — ${alert.location.name}`}
+                  </p>
                   <p className="mt-1 text-[10px] text-slate-600">
-                    {new Date(alert.timestamp).toLocaleString()}
+                    {new Date(alert.created_at).toLocaleString()}
                   </p>
                 </div>
                 {!alert.acknowledged && onAcknowledge && (

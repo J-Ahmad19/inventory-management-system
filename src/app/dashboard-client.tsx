@@ -43,19 +43,16 @@ const movementColors: Record<string, string> = {
 export default function DashboardPage() {
   const { metrics: liveMetrics, alerts: liveAlerts } = useRealtime();
   const [data, setData] = useState<DashboardData | null>(null);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
 
   useEffect(() => {
     fetch("/api/analytics")
       .then((r) => r.json())
-      .then(setData);
-    fetch("/api/alerts?acknowledged=false")
-      .then((r) => r.json())
-      .then((d) => setAlerts(d.alerts));
+      .then(setData)
+      .catch(console.error);
   }, []);
 
   const metrics = liveMetrics ?? data?.metrics;
-  const displayAlerts = liveAlerts.length > 0 ? liveAlerts : alerts;
+  const displayAlerts = liveAlerts.length > 0 ? liveAlerts : data?.recentMovements || [];
 
   if (!data && !metrics) {
     return (

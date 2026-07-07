@@ -1,49 +1,57 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapPin, Package, User, Warehouse } from "lucide-react";
+import { MapPin, Package, Warehouse } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber } from "@/lib/utils";
-
-interface LocationData {
-  id: string;
-  name: string;
-  code: string;
-  type: string;
-  address: string;
-  capacity: number;
-  manager: string;
-  used: number;
-  utilization: number;
-  skuCount: number;
-}
+import type { Location } from "@/lib/types";
 
 const typeIcons = {
-  warehouse: Warehouse,
-  distribution: Package,
-  store: MapPin,
+  WAREHOUSE: Warehouse,
+  RETAIL: Package,
+  DARK_STORE: MapPin,
 };
 
 export function LocationsGrid() {
-  const [locations, setLocations] = useState<LocationData[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/locations")
       .then((r) => r.json())
-      .then((d) => setLocations(d.locations));
+      .then((d) => {
+        setLocations(d.data || []);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to load locations:", error);
+        setLoading(false);
+      });
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12 text-slate-500">
+        Loading locations...
+      </div>
+    );
+  }
+
+  if (locations.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+        <MapPin className="mb-2 h-8 w-8 opacity-50" />
+        <p>No locations found</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {locations.map((loc) => {
         const Icon = typeIcons[loc.type as keyof typeof typeIcons] ?? MapPin;
-        const utilizationColor =
-          loc.utilization > 80
-            ? "bg-red-500"
-            : loc.utilization > 60
-              ? "bg-amber-500"
-              : "bg-emerald-500";
+        const typeLabel = loc.type.replace(/_/g, " ");
 
         return (
           <Card key={loc.id} className="transition-transform hover:scale-[1.01]">
@@ -54,49 +62,35 @@ export function LocationsGrid() {
                 </div>
                 <div>
                   <CardTitle className="text-base">{loc.name}</CardTitle>
-                  <p className="text-xs text-slate-500">{loc.code}</p>
+                  <p className="text-xs text-slate-500">
+                    {new Date(loc.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
-              <Badge variant="outline">{loc.type}</Badge>
+              <Badge variant="outline">{typeLabel}</Badge>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-xs text-slate-400">{loc.address}</p>
-
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-lg font-bold text-white">
-                    {formatNumber(loc.used)}
+                    {formatNumber(loc.capacity)}
                   </p>
-                  <p className="text-[10px] text-slate-500">Units Stored</p>
+                  <p className="text-[10px] text-slate-500">Capacity</p>
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-white">{loc.skuCount}</p>
-                  <p className="text-[10px] text-slate-500">SKUs</p>
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-white">{loc.utilization}%</p>
-                  <p className="text-[10px] text-slate-500">Utilization</p>
+                  <p className="text-lg font-bold text-white">{loc.type}</p>
+                  <p className="text-[10px] text-slate-500">Type</p>
                 </div>
               </div>
 
               <div>
                 <div className="mb-1 flex justify-between text-[10px] text-slate-500">
-                  <span>Capacity</span>
-                  <span>
-                    {formatNumber(loc.used)} / {formatNumber(loc.capacity)}
-                  </span>
+                  <span>Created</span>
+                  <span>{new Date(loc.created_at).toLocaleDateString()}</span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-800">
-                  <div
-                    className={`h-full rounded-full transition-all ${utilizationColor}`}
-                    style={{ width: `${Math.min(loc.utilization, 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <User className="h-3.5 w-3.5" />
-                {loc.manager}
+                <p className="text-[10px] text-slate-400">
+                  Last updated: {new Date(loc.updated_at).toLocaleDateString()}
+                </p>
               </div>
             </CardContent>
           </Card>

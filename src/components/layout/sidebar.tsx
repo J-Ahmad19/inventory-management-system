@@ -18,13 +18,15 @@ const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Inventory", icon: Package },
   { href: "/locations", label: "Locations", icon: MapPin },
+  { href: "/products", label: "Products", icon: Boxes },
+  { href: "/locations/management", label: "Manage Locations", icon: MapPin },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/alerts", label: "Alerts", icon: AlertTriangle },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { connected, metrics } = useRealtime();
+  const { metrics, alerts } = useRealtime();
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-950/80 backdrop-blur-xl">
@@ -42,8 +44,8 @@ export function Sidebar() {
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-          const alertCount =
-            item.href === "/alerts" && metrics ? metrics.activeAlerts : 0;
+              const alertCount =
+            item.href === "/alerts" ? alerts?.filter((a) => !a.acknowledged).length || 0 : 0;
 
           return (
             <Link
@@ -70,15 +72,8 @@ export function Sidebar() {
 
       <div className="border-t border-slate-800 p-4">
         <div className="flex items-center gap-2 rounded-lg bg-slate-900/50 px-3 py-2">
-          <Radio
-            className={cn(
-              "h-3.5 w-3.5",
-              connected ? "text-emerald-400 animate-pulse-dot" : "text-red-400"
-            )}
-          />
-          <span className="text-xs text-slate-400">
-            {connected ? "Live sync active" : "Reconnecting..."}
-          </span>
+          <Radio className="h-3.5 w-3.5 animate-pulse text-emerald-400" />
+          <span className="text-xs text-slate-400">Data sync active</span>
         </div>
       </div>
     </aside>
