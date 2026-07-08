@@ -1,12 +1,25 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function createClient() {
+interface DatabaseConfig {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
+}
+
+export async function createClient(config?: DatabaseConfig) {
   const cookieStore = await cookies();
 
+  // Fallback to env vars if no explicit config is provided (for local testing)
+  const url = config?.supabaseUrl || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const anonKey = config?.supabaseAnonKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  if (!url || !anonKey) {
+    throw new Error("Missing Supabase configuration keys.");
+  }
+
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {
@@ -18,9 +31,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // Can be ignored if handled by middleware refreshing user sessions
           }
         },
       },
