@@ -50,23 +50,49 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Architecture
 
-```
-src/
-├── app/                  # Next.js pages and API routes
-├── components/
-│   ├── dashboard/        # Charts, KPIs, alerts, predictions
-│   ├── inventory/        # Inventory table with filters
-│   ├── layout/           # Sidebar, header, app shell
-│   └── ui/               # Reusable UI primitives
-├── hooks/                # useRealtime SSE hook
-└── lib/
-    ├── data/             # Seed data
-    ├── engine/           # Prediction & shrinkage algorithms
-    ├── store/            # In-memory store with simulation
-    └── types.ts          # TypeScript interfaces
+```mermaid
+flowchart LR
+    A[Browser / UI] --> B[Next.js App Router]
+    B --> C[Page Components]
+    B --> D[API Routes]
+    D --> E[Supabase Server Client]
+    E --> F[(Postgres / Supabase Database)]
+    D --> G[Inventory Store Simulation]
+    G --> H[SSE Event Stream]
+    H --> A
+
+    F --> I[Products]
+    F --> J[Locations]
+    F --> K[Inventory]
+    F --> L[Transaction Ledger]
+    F --> M[Alerts]
 ```
 
-The in-memory store simulates live inventory activity (inbound/outbound every 8 seconds) and can be replaced with a database (PostgreSQL, MongoDB) for production use.
+### Architecture Overview
+
+- The frontend is a React/Next.js application with route-based pages and reusable UI components.
+- API routes handle reads, writes, and operational actions such as stock adjustment and inventory transfer.
+- Supabase provides the persistent relational data layer for products, locations, inventory, transactions, and alerts.
+- The in-memory inventory store simulates live stock movement and emits real-time events through an SSE endpoint for the dashboard experience.
+- A setup script provisions tables and seeds example data so the app can boot quickly in a local or demo environment.
+
+### Project Structure
+
+```text
+src/
+├── app/                  # Next.js pages and API routes
+├── components/           # UI and feature components
+│   ├── dashboard/        # Charts, KPIs, alerts, predictions
+│   ├── inventory/        # Inventory table and stock actions
+│   ├── layout/           # Sidebar, header, app shell
+│   └── ui/               # Reusable UI primitives
+├── hooks/                # SWR hooks for API consumption
+└── lib/
+    ├── data/             # Seed data
+    ├── engine/           # Prediction and shrinkage logic
+    ├── store/            # In-memory realtime simulation store
+    └── types.ts          # Shared TypeScript interfaces
+```
 
 ## Production Considerations
 
